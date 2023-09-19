@@ -56,7 +56,7 @@ namespace PairProgramming.Repository.Event_Repository
             {
                 ID =1,
                 EventDescription = 
-                "There are three Rooms\n"+
+                "Objective: There are three Rooms\n"+
                 "The Left and Right ones are unlocked\n"+
                 "Find Middle Room Clearence\n",
                 EventTasks = new List<string>
@@ -68,7 +68,7 @@ namespace PairProgramming.Repository.Event_Repository
             var level2 = new LevelEvent
             {
                 ID =2,
-                EventDescription = "Find the hacker and put hack the Death Star Computer",
+                EventDescription = "Objective: Find the hacker and hack the Death Star Computer",
                 EventTasks = new List<string>
                 {
                     "Find the Hacker\n",
@@ -79,7 +79,7 @@ namespace PairProgramming.Repository.Event_Repository
              var level3 = new BossFight
             {
                 ID =3,
-                EventDescription = "Defeat Darth Vader!!!",
+                EventDescription = "Objective: Defeat Darth Vader!!!",
                 EventTasks = new List<string>
                 {
                     "Defeat Darth Vader"

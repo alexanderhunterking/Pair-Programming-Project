@@ -10,7 +10,7 @@ namespace PairProgramming.Data.Entities.DeathStarEntities
         {
             Name = "The Death Star";
             Location = "Orbiting a helpless planet";
-            Player = new Player("C3PO");
+            Player = new Player("Luke Skywalker");
         }
 
         public int ID { get; set; }
