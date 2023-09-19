@@ -1,4 +1,4 @@
-﻿using consoleGame.PairProgramming.UI;
+﻿using PairProgramming.UI;
 
 
 ProgramUI UI = new ProgramUI();
