@@ -1,5 +1,5 @@
 using PairProgramming.Data.Entities.EventEntities;
-using PairProgramming.Data.Entities.EventEntities;
+
 using PairProgramming.Data.Entities.DeathStarEntities;
 using PairProgramming.Repository.Event_Repository;
 

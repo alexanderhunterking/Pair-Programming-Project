@@ -11,10 +11,10 @@ namespace PairProgramming.UI
     {
         private readonly DeathStarRepository _swDeathStarRepo = new DeathStarRepository();
         private DeathStar _deathStar;
-        // private int _eventCounter;
-            private bool IsRunning = true;
-        // public bool _hasMiddleRoomClearence;
-        // public bool _hasHacker;
+        private int _eventCounter;
+        private bool IsRunning = true;
+        public bool _hasMiddleRoomClearence;
+        public bool _hasHacker;
 
 
         public ProgramUI()
@@ -78,394 +78,370 @@ namespace PairProgramming.UI
             WriteLine("Press any key to continue.");
             ReadKey();
         }
-         private void StartGame()
+
+        private void StartGame()
         {
+            Clear();
+
+            while (!_deathStar.Player.IsDead && IsRunning)
+            {
+                GameUtilities.TellTheStory($"You sensed a disturbence in the force. Darth Vader is up to something and you need to stop him." +
+                                          $"You land you x wing in the Death Star... Press any Key to Continue...");
+
+                ReadKey();
+                while (_hasMiddleRoomClearence == false)
+                {
+                    LoadFirstEvent();
+                }
+
+                GameUtilities.TellTheStory("You use the clearence key to open the Middle Room Door!");
+
+                GameUtilities.TellTheStory("You go up the elevator, your on the Next Level!");
+
+                while (_hasHacker == false)
+                {
+                    LoadSecondEvent();
+                }
+
+                LoadFinalEvent();
+
+                ReadKey();
+            }
+
+            if (_deathStar.Player.IsDead)
+            {
+                IsRunning = CloseGame();
+            }
+        }
+
+        private void LoadFinalEvent()
+        {
+            Clear();
+            ClearEventCounter();
+
+
+
+            GameUtilities.TellTheStory("You successfully hacked the computer. the room is dark. Darth Vader emerges.\n" +
+                                       "1. Prepare to defend yourself!\n" +
+                                       "2. Surrender?\n" +
+                                       "3. Try to escape!\n");
+
+            var userInput = ReadLine();
+            switch (userInput)
+            {
+                case "1":
+                    ShootDarthVader();
+                    break;
+
+                case "2":
+                    AskQuestions();
+                    break;
+
+                case "3":
+                    TryToEscape();
+                    break;
+
+                default:
+                    WriteLine("Invalid Selection");
+                    break;
+            }
+        }
+
+        private void TryToEscape()
+        {
+            Clear();
+            BossFight currentEvent = (BossFight)_deathStar.LevelsInDeathStar[1].Events[0];
+            GameUtilities.TellTheStory("You try to escape. Darth Vader Slams the door closed with the force.\n" +
+                                       "Darth Vader says, 'The force is weak with you'");
+            currentEvent.Boss!.Attack(_deathStar.Player, 1000, "Do not underestimate the power of the force.");
+            _hasHacker = false;
+        }
+
+
+        private void AskQuestions()
+        {
+            Clear();
+           BossFight currentEvent = (BossFight)_deathStar.LevelsInDeathStar[1].Events[0];
+            GameUtilities.TellTheStory("You ask him who he is...\n'I am your father' says Darth Vader\nYou try to escape. Darth Vader Slams the door closed with the force.\n" +
+                                       "Darth Vader says, 'The force is weak with you'");
+            
+            currentEvent.Boss!.Attack(_deathStar.Player, 1000, "Do not underestimate the power of the force.");
+            _hasHacker = false;
+        }
+
+
+        private void ShootDarthVader()
+        {
+            Clear();
+            BossFight currentEvent = (BossFight)_deathStar.LevelsInDeathStar[1].Events[0];
+            GameUtilities.TellTheStory("You shoot Darth Vader");
+            _deathStar.Player.ShootBlaster(currentEvent.Boss!, 50);
+            if (_deathStar.Player.IsDead == false)
+            {
+                while (currentEvent.Boss!.HealthPoints > 0)
+                {
+                    GameUtilities.TellTheStory("Will you shoot again y/n");
+                    var userInput = ReadLine();
+                    if (userInput != "Y".ToLower())
+                    {
+                        Clear();
+                        GameUtilities.TellTheStory("You try to escape. Darth Vader Slams the door closed with the force.\n" +
+                                       "Darth Vader says, 'The force is weak with you'");
+                        currentEvent.Boss!.Attack(_deathStar.Player, 1000, "Do not underestimate the power of the force.");
+                        _hasHacker = false;
+                        break;
+                    }
+                    else
+                    {
+                        _deathStar.Player.ShootBlaster(currentEvent.Boss, 20);
+                    }
+                }
+                if (currentEvent.Boss.IsDead)
+                {
+
+                    WriteLine("You killed Darth Vader and saved the galaxy!");
+                    IsRunning = CloseGame();
+                }
+            }
+            else
+            {
+                IsRunning = CloseGame();
+            }
+        }
+
+        private void LoadSecondEvent()
+        {
+            Clear();
+            ClearEventCounter();
+            var currentEvent = _deathStar.LevelsInDeathStar[(int)PairProgramming.Data.Entities.Index.FirstEvent].Events[++_eventCounter];
+            GameUtilities.TellTheStory("There is a large computer in the hall way. Looks like it is password protected. You need to find the hacker.");
+            GameUtilities.TellTheStory(currentEvent.EventDescription);
+            GameUtilities.TellTheStory("Which room will you select this time?\n" +
+                                       "1. The Room down the loading dock and to the Left?\n" +
+                                       "2. The Room by the generator room and to the Right?\n");
+
+            var userInput = ReadLine();
+            switch (userInput)
+            {
+                case "1":
+                    LoadTheRoomLeft();
+                    break;
+                case "2":
+                    LoadTheRoomRight();
+                    break;
+                default:
+                    System.Console.WriteLine("Invalid Selection");
+                    break;
+            }
+
+
+        }
+
+        private void LoadTheRoomLeft()
+        {
+            bool hasLeftRoom = false;
+            while (!hasLeftRoom)
+            {
+                Clear();
+                GameUtilities.TellTheStory("You Entered an empty Storm Trooper Bararcks What will you do next?\n" +
+                                        "1. Look under the bunk beds.\n" +
+                                        "2. The mini fridge\n" +
+                                        "3. Leave the room.");
+                var userInput = ReadLine();
+                switch (userInput)
+                {
+                    case "1":
+                        Clear();
+                        GameUtilities.TellTheStory("You look underneath the bunk beds... You find a StromTrooper's Teddy Bear... 'Ha! funny!' you say");
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "2":
+                        Clear();
+                        GameUtilities.TellTheStory("You look inside the mini fridge... Random Drinks...");
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "3":
+                        Clear();
+                        GameUtilities.TellTheStory("You exit the room.");
+                        PressAnyKeyToContinue();
+                        hasLeftRoom = true;
+                        LoadSecondEvent();
+                        break;
+
+                    default:
+                        WriteLine("Invalid Selection.");
+                        break;
+                }
+            }
+        }
+
+
+        private void LoadTheRoomRight()
+        {
+            bool hasLeftRoom = false;
+            while (!hasLeftRoom)
+            {
+                Clear();
+                GameUtilities.TellTheStory("You enterd the room. Its the generator maintence room. \n" +
+                "1. Behind the Empire Propaganda Poster?\n" +
+                "2. A Box next to the Control Panel.\n" +
+                "3. Leave the room.");
+
+                var userInput = ReadLine();
+
+                switch (userInput)
+                {
+                    case "1":
+                        Clear();
+                        GameUtilities.TellTheStory("You look inside...NOTHING.");
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "2":
+                        Clear();
+                        GameUtilities.TellTheStory("You pick up the box and open it. The Hacker is inside!");
+                        _hasHacker = true;
+                        hasLeftRoom = true;
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "3":
+                        Clear();
+                        GameUtilities.TellTheStory("You exit the room!");
+                        PressAnyKeyToContinue();
+                        hasLeftRoom = true;
+                        LoadSecondEvent();
+                        break;
+
+                    default:
+                        WriteLine("Invalid Selection");
+                        break;
+                }
+            }
+        }
+
+
+        private void ClearEventCounter()
+        {
+            _eventCounter = 0;
+        }
+
+        private void LoadFirstEvent()
+        {
+            ClearEventCounter();
+            Clear();
+
+            var currentEvent = _deathStar.LevelsInDeathStar[(int)PairProgramming.Data.Entities.Index.FirstEvent].Events[++_eventCounter];
+
+            GameUtilities.TellTheStory(currentEvent.EventDescription);
+
+            GameUtilities.TellTheStory("Which Room will you select?\n" +
+                                         "1. Room on the Left\n" +
+                                         "2. Room on the Right\n");
+
+            var userInput = ReadLine();
+            switch (userInput)
+            {
+                case "1":
+                    YouChoseTheLeftRoom();
+                    break;
+                case "2":
+                    YouChoseTheRightRoom();
+                    break;
+                default:
+                    WriteLine("Invalid Selection.");
+                    break;
+            }
+        }
+
+        private void YouChoseTheRightRoom()
+        {
+            bool hasLeftRoom = false;
+            while (!hasLeftRoom)
+            {
+                Clear();
+                GameUtilities.TellTheStory("You Entered the Right Room. Its a garbage compactor! You are stuck and need to find a weight out!\n" +
+                "1. Swim Under the trash!\n" +
+                "2. Panic and do nothing\n" +
+                "3. Use your light saber to cut the door open");
+
+                var userInput = ReadLine();
+                switch (userInput)
+                {
+                    case "1":
+                        Clear();
+                        GameUtilities.TellTheStory("You swam under the trash and found a monster! You swim back to the surface. 'I better find a way out' you say");
+                        PressAnyKeyToContinue();
+                        break;
+                    case "2":
+                        Clear();
+                        GameUtilities.TellTheStory("Really!? you are panicing right now!?");
+                        PressAnyKeyToContinue();
+                        break;
+                    case "3":
+                        Clear();
+                        GameUtilities.TellTheStory("Your light saber easily cuts through the door and you are able to escape!");
+                        PressAnyKeyToContinue();
+                        hasLeftRoom = true;
+                        LoadFirstEvent();
+                        break;
+                    default:
+                        WriteLine("Invalid Selection");
+                        break;
+                }
+            }
+        }
+
+
+        private void YouChoseTheLeftRoom()
+        {
+            bool hasLeftRoom = false;
+
+            while (!hasLeftRoom)
+            {
+                Clear();
+                GameUtilities.TellTheStory("You Entered the left room\nIt seems to be the janitors closet.\nWhere do you want to look.\n" +
+                 "1. In the tool box\n" +
+                 "2. In the mop bucket\n" +
+                 "3. Inside the the janitor jacket hanging on the door\n" +
+                 "4. Leave the room\n");
+
+                var userInput = ReadLine();
+
+                switch (userInput)
+                {
+                    case "1":
+                        GameUtilities.TellTheStory("You check the tool box... oh wow some tools!");
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "2":
+                        GameUtilities.TellTheStory("You check the Mop bucket...Nothing but some dirty Water!");
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "3":
+                        GameUtilities.TellTheStory("You feel the pockets of the Janitor jacket...You found the Clearence Key!");
+                        _hasMiddleRoomClearence = true;
+                        GameUtilities.TellTheStory("You Exit the room");
+                        hasLeftRoom = true;
+                        PressAnyKeyToContinue();
+                        break;
+
+                    case "4":
+                        GameUtilities.TellTheStory("You exit the Room!");
+                        PressAnyKeyToContinue();
+                        hasLeftRoom = true;
+                        LoadFirstEvent();
+                        break;
+
+                    default:
+                        WriteLine("Invalid Selection!");
+                        break;
+                }
+            }
         }
     }
 }
-
-//         private void StartGame()
-//         {
-//             Clear();
-
-//             while (!_house.Player.IsDead && IsRunning)
-//             {
-//                 GameUtilities.TellTheStory($"You are a Paranormal Investigator,\nand you have to enter a haunted house on {_house.Address}" +
-//                                           $"You notice... Press any Key to Continue...");
-
-//                 ReadKey();
-//                 while (_hasMiddleRoomKey == false)
-//                 {
-//                     LoadFirstChallenge();
-//                 }
-
-//                 GameUtilities.TellTheStory("You use a key to opent the Middle Room Door!");
-
-//                 GameUtilities.TellTheStory("You go up the stairs, your on the Next Floor!");
-
-//                 while (_hasPuzzlePiece == false)
-//                 {
-//                     LoadSecondChallenge();
-//                 }
-
-//                 LoadFinalChallenge();
-
-//                 ReadKey();
-//             }
-
-//             if (_house.Player.IsDead)
-//             {
-//                 IsRunning = CloseGame();
-//             }
-//         }
-
-//         private void LoadFinalChallenge()
-//         {
-//             Clear();
-//             ClearChallengCounter();
-
-//             //  var currentChallenge = _house.FloorsInHouse[(int)ChallengesIndex.SecondChallenge].Challenges[_challengeCounter];
-
-//             GameUtilities.TellTheStory("You place the puzzle piece inside of a missing section of the Puzzle\nDARKNESS SURROUNDS YOU\n" +
-//                                        "A creepy individual with pins in his head approaches, what will you do?\n" +
-//                                        "1. Shoot the Damn Demon!\n" +
-//                                        "2. Ask him what he wants?\n" +
-//                                        "3. Try to escape!\n");
-
-//             var userInput = ReadLine();
-//             switch (userInput)
-//             {
-//                 case "1":
-//                     ShootTheDamnDemon();
-//                     break;
-
-//                 case "2":
-//                     AskWhatHeWants();
-//                     break;
-
-//                 case "3":
-//                     TryToEscape();
-//                     break;
-
-//                 default:
-//                     WriteLine("Invalid Selection, THIS CAN COST YOU YOUR LIFE!!!!");
-//                     break;
-//             }
-//         }
-
-//         private void TryToEscape()
-//         {
-//             Clear();
-//             BossChallenge currentChallenge = (BossChallenge)_house.FloorsInHouse[1].Challenges[0];
-//             GameUtilities.TellTheStory("You try to get away, Fish hooks fly from nowhere and attach to you.\nTHEY RIP YOU APART!!\n" +
-//                                        "The man with pins in his head laughs, 'HAAAAA,HA,HA!'");
-//             currentChallenge.Boss!.Attack(_house.Player, 1000, "Fish-Hooks of Destruction!");
-//             _hasPuzzlePiece = false;
-//         }
-
-
-//         private void AskWhatHeWants()
-//         {
-//             Clear();
-//             BossChallenge currentChallenge = (BossChallenge)_house.FloorsInHouse[1].Challenges[0];
-//             GameUtilities.TellTheStory("You ask him what he wants...\nYOUR SOUL!!!\nYou try to get away, Fish hooks fly from nowhere and attach to you.\nTHEY RIP YOU APART!!\n" +
-//                                        "The man with pins in his head laughs, 'HAAAAA,HA,HA!'");
-//             currentChallenge.Boss!.Attack(_house.Player, 1000, "Fish-Hooks of Destruction!");
-//             _hasPuzzlePiece = false;
-//         }
-
-
-//         private void ShootTheDamnDemon()
-//         {
-//             Clear();
-//             BossChallenge currentChallenge = (BossChallenge)_house.FloorsInHouse[1].Challenges[0];
-//             GameUtilities.TellTheStory("You shoot the Damn Demon!");
-//             _house.Player.ShootPlasmaPistol(currentChallenge.Boss!, 50);
-//             if (_house.Player.IsDead == false)
-//             {
-//                 while (currentChallenge.Boss!.HealthPoints > 0)
-//                 {
-//                     GameUtilities.TellTheStory("Will you shoot again y/n");
-//                     var userInput = ReadLine();
-//                     if (userInput != "Y".ToLower())
-//                     {
-//                         Clear();
-//                         GameUtilities.TellTheStory("You ask him what he wants...\nYOUR SOUL!!!\nYou try to get away, Fish hooks fly from nowhere and attach to you.\nTHEY RIP YOU APART!!\n" +
-//                                          "The man with pins in his head laughs, 'HAAAAA,HA,HA!'");
-//                         currentChallenge.Boss!.Attack(_house.Player, 1000, "Fish-Hooks of Destruction!");
-//                         _hasPuzzlePiece = false;
-//                         break;
-//                     }
-//                     else
-//                     {
-//                         _house.Player.ShootPlasmaPistol(currentChallenge.Boss, 20);
-//                     }
-//                 }
-//                 if (currentChallenge.Boss.IsDead)
-//                 {
-
-//                     WriteLine("You killed the Demon With Pins In His Head!!!...or so you thought...");
-//                     IsRunning = CloseGame();
-//                 }
-//             }
-//             else
-//             {
-//                 IsRunning = CloseGame();
-//             }
-//         }
-
-//         private void LoadSecondChallenge()
-//         {
-//             Clear();
-//             ClearChallengCounter();
-//             var currentChallenge = _house.FloorsInHouse[(int)HauntedHouse.Data.Entities.ChallengesIndex.FirstChallenge].Challenges[++_challengeCounter];
-//             GameUtilities.TellTheStory("There is a Large Puzzle in the middle of the hall.");
-//             GameUtilities.TellTheStory(currentChallenge.ChallengeDescription);
-//             GameUtilities.TellTheStory("Which room will you select this time?\n" +
-//                                        "1. The Room down the hall and to the Left?\n" +
-//                                        "2. The Room down the hall and to the Right?\n");
-
-//             var userInput = ReadLine();
-//             switch (userInput)
-//             {
-//                 case "1":
-//                     LoadTheRoomDownTheHall_ToTheLeft();
-//                     break;
-//                 case "2":
-//                     LoadTheRoomDownTheHall_ToTheRight();
-//                     break;
-//                 default:
-//                     System.Console.WriteLine("Invalid Selection");
-//                     break;
-//             }
-
-
-//         }
-
-//         private void LoadTheRoomDownTheHall_ToTheLeft()
-//         {
-//             bool hasLeftRoom = false;
-//             while (!hasLeftRoom)
-//             {
-//                 Clear();
-//                 GameUtilities.TellTheStory("You entered the room. Its some sort of Theater of Lost Souls, Lets investigate further.\n" +
-//                                         "1. Inside the Broken Globe in the middle of the room.\n" +
-//                                         "2. A Random Purse on the floor\n" +
-//                                         "3. A Dead body that's stapled to the wall\n" +
-//                                         "4. Leave the room.");
-//                 var userInput = ReadLine();
-//                 switch (userInput)
-//                 {
-//                     case "1":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You look inside...NOTHING...");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "2":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You look inside...Random stuff...");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "3":
-//                         GameUtilities.TellTheStory("You move it around and .... Yuck! Its head falls off!");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "4":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You exit the room.");
-//                         PressAnyKeyToContinue();
-//                         hasLeftRoom = true;
-//                         LoadSecondChallenge();
-//                         break;
-
-//                     default:
-//                         WriteLine("Invalid Selection.");
-//                         break;
-//                 }
-//             }
-//         }
-
-
-//         private void LoadTheRoomDownTheHall_ToTheRight()
-//         {
-//             bool hasLeftRoom = false;
-//             while (!hasLeftRoom)
-//             {
-//                 Clear();
-//                 GameUtilities.TellTheStory("You enterd the room. Its just a basic room.\nLets investigate further...\n" +
-//                 "1. Inside a coffie cup?\n" +
-//                 "2. A Shiny Box (it looks like a puzzle box)\n" +
-//                 "3. A dead body that's slumped over the fireplace.\n" +
-//                 "4. Leave the room.");
-
-//                 var userInput = ReadLine();
-
-//                 switch (userInput)
-//                 {
-//                     case "1":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You look inside...NOTHING.");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "2":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You rub the box... It reconfigures itself..I looks like what we have been looking for!");
-//                         _hasPuzzlePiece = true;
-//                         hasLeftRoom = true;
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "3":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You move it around and... Yuck its head falls off!");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "4":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You exit the room!");
-//                         PressAnyKeyToContinue();
-//                         hasLeftRoom = true;
-//                         LoadSecondChallenge();
-//                         break;
-
-//                     default:
-//                         WriteLine("Invalid Selection");
-//                         break;
-//                 }
-//             }
-//         }
-
-
-//         private void ClearChallengCounter()
-//         {
-//             _challengeCounter = 0;
-//         }
-
-//         private void LoadFirstChallenge()
-//         {
-//             ClearChallengCounter();
-//             Clear();
-
-//             var currentChallenge = _house.FloorsInHouse[(int)HauntedHouse.Data.Entities.ChallengesIndex.FirstChallenge].Challenges[++_challengeCounter];
-
-//             GameUtilities.TellTheStory(currentChallenge.ChallengeDescription);
-
-//             GameUtilities.TellTheStory("Which Room will you select?\n" +
-//                                          "1. Room on the Left\n" +
-//                                          "2. Room on the Right\n");
-
-//             var userInput = ReadLine();
-//             switch (userInput)
-//             {
-//                 case "1":
-//                     YouChoseTheLeftRoom();
-//                     break;
-//                 case "2":
-//                     YouChoseTheRightRoom();
-//                     break;
-//                 default:
-//                     WriteLine("Invalid Selection.");
-//                     break;
-//             }
-//         }
-
-//         private void YouChoseTheRightRoom()
-//         {
-//             bool hasLeftRoom = false;
-//             while (!hasLeftRoom)
-//             {
-//                 Clear();
-//                 GameUtilities.TellTheStory("You Entered the Right Room. Its the Kitchen, and its a mess. But, lets investigate further. Where do you want to look?\n" +
-//                 "1. In the Refrigerator\n" +
-//                 "2. On top of the Kitchen Island\n" +
-//                 "3. In the Lower Cabinets\n" +
-//                 "4. Leave The Room");
-
-//                 var userInput = ReadLine();
-//                 switch (userInput)
-//                 {
-//                     case "1":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You open the refrigerator door...NOTHING...");
-//                         PressAnyKeyToContinue();
-//                         break;
-//                     case "2":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You look on top of the Kitchen Island. Its completely covered with random stuff..");
-//                         PressAnyKeyToContinue();
-//                         break;
-//                     case "3":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You check the Lower Cabinets...Again Theres NOTHING...");
-//                         PressAnyKeyToContinue();
-//                         break;
-//                     case "4":
-//                         Clear();
-//                         GameUtilities.TellTheStory("You Exit the Room.");
-//                         PressAnyKeyToContinue();
-//                         hasLeftRoom = true;
-//                         LoadFirstChallenge();
-//                         break;
-//                     default:
-//                         WriteLine("Invalid Selection");
-//                         break;
-//                 }
-//             }
-//         }
-
-
-//         private void YouChoseTheLeftRoom()
-//         {
-//             bool hasLeftRoom = false;
-
-//             while (!hasLeftRoom)
-//             {
-//                 Clear();
-//                 GameUtilities.TellTheStory("You Entered the left room\nIts the Living Room, and its a mess.\nBut lets investigate further.\nWhere do you want to look.\n" +
-//                  "1. On the couch\n" +
-//                  "2. On the coffie table\n" +
-//                  "3. Inside the broken television\n" +
-//                  "4. Leave the room\n");
-
-//                 var userInput = ReadLine();
-
-//                 switch (userInput)
-//                 {
-//                     case "1":
-//                         GameUtilities.TellTheStory("You check the couch...Nothing!");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "2":
-//                         GameUtilities.TellTheStory("You check the Coffie Table...Nothing! You take a look at the couch and see a shiny object!");
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "3":
-//                         GameUtilities.TellTheStory("You check inside the broken Television Screen...You found the Middle Room Key!");
-//                         _hasMiddleRoomKey = true;
-//                         GameUtilities.TellTheStory("You Exit the room");
-//                         hasLeftRoom = true;
-//                         PressAnyKeyToContinue();
-//                         break;
-
-//                     case "4":
-//                         GameUtilities.TellTheStory("You exit the Room!");
-//                         PressAnyKeyToContinue();
-//                         hasLeftRoom = true;
-//                         LoadFirstChallenge();
-//                         break;
-
-//                     default:
-//                         WriteLine("Invalid Selection!");
-//                         break;
-//                 }
-//             }
-//         }
-//     }
-// }

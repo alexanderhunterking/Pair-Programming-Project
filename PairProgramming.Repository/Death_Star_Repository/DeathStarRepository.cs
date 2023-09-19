@@ -33,7 +33,7 @@ namespace PairProgramming.Repository.Death_Star_Repository
             return _deathStarDb;
         }
 
-        public List<DeathStar> GetDeathStar()
+        public DeathStar GetDeathStar()
         {
             return _deathStarDb.FirstOrDefault()!;
         }
@@ -48,8 +48,10 @@ namespace PairProgramming.Repository.Death_Star_Repository
         }
         private void SeedData()
         {
-            var deathStar = new DeathStar();
-            deathStar.LevelsInDeathStar = _swDeathStarLevelRepo.GetLevels();
+            var deathStar = new DeathStar
+            {
+                LevelsInDeathStar = _swDeathStarLevelRepo.GetLevels()
+            };
             AddDeathStar(deathStar);
         }
     }
